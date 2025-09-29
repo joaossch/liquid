@@ -60,7 +60,8 @@
       ],
       "name": "t:names.hero",
       "settings": {
-        "media_type_1": "image",
+        "media_type_1": "video",
+        "video_1": "shopify://files/videos/PixVerse_V5_Image_Text_360P_sofa_3D.mp4",
         "media_type_2": "image",
         "link": "",
         "open_in_new_tab": false,
