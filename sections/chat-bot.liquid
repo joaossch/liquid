@@ -1,0 +1,87 @@
+<!-- Botão de Chat Personalizado -->
+<div id="custom-chat-button" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+  <button onclick="openTawkChat()" style="
+    background: {{ section.settings.button_color }}; 
+    color: {{ section.settings.text_color }}; 
+    border: none; 
+    border-radius: 50px; 
+    padding: 15px 20px; 
+    font-size: 16px; 
+    cursor: pointer; 
+    box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+    transition: all 0.3s ease;
+  " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+    {{ section.settings.button_text }}
+  </button>
+</div>
+
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+
+// Função para abrir o chat
+function openTawkChat() {
+  if (typeof Tawk_API !== 'undefined' && Tawk_API.maximize) {
+    Tawk_API.maximize();
+  }
+}
+
+// Configurar Tawk.to para iniciar minimizado
+Tawk_API.onLoad = function(){
+  {% if section.settings.hide_default_widget %}
+    Tawk_API.hideWidget();
+  {% endif %}
+};
+
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='{{ section.settings.tawk_url }}';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Chat Bot",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Texto do Botão",
+      "default": "💬 Chat"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Cor do Botão",
+      "default": "#007bff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Cor do Texto",
+      "default": "#ffffff"
+    },
+    {
+      "type": "url",
+      "id": "tawk_url",
+      "label": "URL do Script Tawk.to",
+      "default": "https://embed.tawk.to/68db0a791e8c551950e0e766/1j6bq1qt9"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_default_widget",
+      "label": "Esconder widget padrão do Tawk.to",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Chat Bot"
+    }
+  ]
+}
+{% endschema %}
