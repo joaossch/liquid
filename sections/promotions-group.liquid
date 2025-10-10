@@ -1,0 +1,72 @@
+<h2 style="text-align: {{ section.settings.title_alignment }}">{{ section.settings.title }}</h2>
+
+<div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+{%  for block in section.blocks %}
+    {% if block.type == 'promotion' %}
+     <div style="text-align: center; max-width: 250px;">
+       <h3>{{ block.settings.promotion_text }}</h3>
+       {{ block.settings.promotion_image | image_url: width: 200 | image_tag: style: "width: 100%; height: auto; border-radius: 8px;" }}
+     </div>
+     {% endif %}
+{% endfor %}
+</div>
+
+{% schema %}
+{
+   "name": "Promotions group",
+   "tag": "section",
+   "settings": [
+    { 
+      "type": "text",
+      "id": "title",
+      "label": "Title"
+    },       
+    {
+    "type": "select",
+    "id": "title_alignment",
+    "label": "Title Alignment",
+    "options": [
+      {
+        "value": "left",
+        "label": "Left"
+      },
+      {
+        "value": "center",
+        "label": "Center"
+      },
+      {
+        "value": "right",
+        "label": "Right"
+      }
+    ],
+    "default": "center"
+  }
+],
+"blocks": [
+    { 
+    "type": "promotion",
+    "name": "Promotion",
+     "settings": [
+        {
+            "type": "image_picker",
+            "id": "promotion_image",
+            "label": "Promotion Image"
+            },
+            {
+            "type": "text",
+            "id": "promotion_text",
+            "label": "Promotion Text"
+            },
+            
+        
+     ]    
+} 
+],
+"presets": [
+    {
+      "name": "Promotions group"
+    }
+  ]
+   
+}
+{% endschema %}
