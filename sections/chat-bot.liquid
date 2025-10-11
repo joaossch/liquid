@@ -1,0 +1,105 @@
+<!-- Botão de Chat Personalizado -->
+<div id="custom-chat-button" style="
+  position: {{ section.settings.button_position }};
+  bottom: {{ section.settings.bottom_spacing }}px;
+  right: {{ section.settings.right_spacing }}px;
+  z-index: 1000;
+">
+  <button onclick="openTawkChat()" style="
+    background: rgba(0,0,0,0.05); 
+    color: transparent; 
+    border: 1px solid rgba(0,0,0,0.1); 
+    border-radius: 50%;
+    cursor: pointer; 
+    width: {{ section.settings.button_size }}px;
+    height: {{ section.settings.button_size }}px;
+    transition: all 0.3s ease;
+  " onmouseover="this.style.background='rgba(0,123,255,0.1)'; this.style.borderColor='rgba(0,123,255,0.3)'" onmouseout="this.style.background='rgba(0,0,0,0.05)'; this.style.borderColor='rgba(0,0,0,0.1)'">
+  </button>
+</div>
+
+<!-- Incluir script do Tawk.to -->
+{% render 'tawk-chat-script', tawk_url: section.settings.tawk_url, hide_widget: section.settings.hide_default_widget %}
+
+{% schema %}
+{
+  "name": "Chat Bot",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Invisible Button Settings"
+    },
+    {
+      "type": "range",
+      "id": "button_size",
+      "label": "Clickable Area Size",
+      "min": 20,
+      "max": 100,
+      "step": 10,
+      "default": 50,
+      "info": "Sets the size of the invisible area that activates the chat"
+    },
+    {
+      "type": "header",
+      "content": "Positioning"
+    },
+    {
+      "type": "select",
+      "id": "button_position",
+      "label": "Button Position",
+      "options": [
+        {
+          "value": "fixed",
+          "label": "Fixed (floats on screen)"
+        },
+        {
+          "value": "relative",
+          "label": "Relative (in page)"
+        }
+      ],
+      "default": "fixed"
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "label": "Bottom Spacing",
+      "min": 10,
+      "max": 100,
+      "step": 10,
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "right_spacing",
+      "label": "Right Spacing",
+      "min": 10,
+      "max": 100,
+      "step": 10,
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Tawk.to Settings"
+    },
+    {
+      "type": "text",
+      "id": "tawk_url",
+      "label": "Tawk.to Script URL",
+      "default": "https://embed.tawk.to/68db0a791e8c551950e0e766/1j6bq1qt9",
+      "info": "Paste the complete Tawk.to script URL here"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_default_widget",
+      "label": "Hide default Tawk.to widget",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Chat Bot"
+    }
+  ]
+}
+{% endschema %}
