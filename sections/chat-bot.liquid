@@ -1,46 +1,25 @@
 <!-- Botão de Chat Personalizado -->
-<div id="custom-chat-button" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+<div id="custom-chat-button" style="
+  position: {{ section.settings.button_position }};
+  bottom: {{ section.settings.bottom_spacing }}px;
+  right: {{ section.settings.right_spacing }}px;
+  z-index: 1000;
+">
   <button onclick="openTawkChat()" style="
-    background: {{ section.settings.button_color }}; 
-    color: {{ section.settings.text_color }}; 
-    border: none; 
-    border-radius: 50px; 
-    padding: 15px 20px; 
-    font-size: 16px; 
+    background: rgba(0,0,0,0.05); 
+    color: transparent; 
+    border: 1px solid rgba(0,0,0,0.1); 
+    border-radius: 50%;
     cursor: pointer; 
-    box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+    width: {{ section.settings.button_size }}px;
+    height: {{ section.settings.button_size }}px;
     transition: all 0.3s ease;
-  " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-    {{ section.settings.button_text }}
+  " onmouseover="this.style.background='rgba(0,123,255,0.1)'; this.style.borderColor='rgba(0,123,255,0.3)'" onmouseout="this.style.background='rgba(0,0,0,0.05)'; this.style.borderColor='rgba(0,0,0,0.1)'">
   </button>
 </div>
 
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-
-// Função para abrir o chat
-function openTawkChat() {
-  if (typeof Tawk_API !== 'undefined' && Tawk_API.maximize) {
-    Tawk_API.maximize();
-  }
-}
-
-// Configurar Tawk.to para iniciar minimizado
-Tawk_API.onLoad = function(){
-  {% if section.settings.hide_default_widget %}
-    Tawk_API.hideWidget();
-  {% endif %}
-};
-
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='{{ section.settings.tawk_url }}';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
+<!-- Incluir script do Tawk.to -->
+{% render 'tawk-chat-script', tawk_url: section.settings.tawk_url, hide_widget: section.settings.hide_default_widget %}
 
 {% schema %}
 {
@@ -48,33 +27,72 @@ s0.parentNode.insertBefore(s1,s0);
   "tag": "section",
   "settings": [
     {
+      "type": "header",
+      "content": "Invisible Button Settings"
+    },
+    {
+      "type": "range",
+      "id": "button_size",
+      "label": "Clickable Area Size",
+      "min": 20,
+      "max": 100,
+      "step": 10,
+      "default": 50,
+      "info": "Sets the size of the invisible area that activates the chat"
+    },
+    {
+      "type": "header",
+      "content": "Positioning"
+    },
+    {
+      "type": "select",
+      "id": "button_position",
+      "label": "Button Position",
+      "options": [
+        {
+          "value": "fixed",
+          "label": "Fixed (floats on screen)"
+        },
+        {
+          "value": "relative",
+          "label": "Relative (in page)"
+        }
+      ],
+      "default": "fixed"
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "label": "Bottom Spacing",
+      "min": 10,
+      "max": 100,
+      "step": 10,
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "right_spacing",
+      "label": "Right Spacing",
+      "min": 10,
+      "max": 100,
+      "step": 10,
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Tawk.to Settings"
+    },
+    {
       "type": "text",
-      "id": "button_text",
-      "label": "Texto do Botão",
-      "default": "💬 Chat"
-    },
-    {
-      "type": "color",
-      "id": "button_color",
-      "label": "Cor do Botão",
-      "default": "#007bff"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Cor do Texto",
-      "default": "#ffffff"
-    },
-    {
-      "type": "url",
       "id": "tawk_url",
-      "label": "URL do Script Tawk.to",
-      "default": "https://embed.tawk.to/68db0a791e8c551950e0e766/1j6bq1qt9"
+      "label": "Tawk.to Script URL",
+      "default": "https://embed.tawk.to/68db0a791e8c551950e0e766/1j6bq1qt9",
+      "info": "Paste the complete Tawk.to script URL here"
     },
     {
       "type": "checkbox",
       "id": "hide_default_widget",
-      "label": "Esconder widget padrão do Tawk.to",
+      "label": "Hide default Tawk.to widget",
       "default": true
     }
   ],

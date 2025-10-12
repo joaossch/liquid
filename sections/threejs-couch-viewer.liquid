@@ -1,0 +1,690 @@
+<div class="threejs-couch-container">
+  <div class="couch-viewer-wrapper">
+    <div class="model-container">
+      <div id="model__container" style="width: 100%; height: 500px;"></div>
+      <p style="text-align: center; margin-top: 10px;">{{ section.settings.viewer_description | default: 'Drag couch to view different angles' }}</p>
+    </div>
+
+    <div class="texture-selector">
+      <!-- Fabric Options from Products -->
+      <div class="fabric-options">
+        <h3>{{ section.settings.fabric_title | default: 'SELECT FABRIC' }}</h3>
+        <div class="texture-grid">
+          {% assign fabric_products = collections.all.products | where: 'tags', section.settings.fabric_tag %}
+          {% for product in fabric_products limit: 8 %}
+            <div class="texture-item fabric-option" 
+                 data-texture="{{ product.featured_image | image_url: width: 512 }}"
+                 data-name="{{ product.title }}"
+                 data-product-id="{{ product.id }}">
+              <img src="{{ product.featured_image | image_url: width: 80 }}" 
+                   alt="{{ product.title }}"
+                   width="60" 
+                   height="60"
+                   loading="lazy">
+              <p class="texture-name">{{ product.title }}</p>
+              {% if section.settings.show_price %}
+                <span class="texture-price">{{ product.price | money }}</span>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Wood Options from Products -->
+      <div class="wood-options">
+        <h3>{{ section.settings.wood_title | default: 'SELECT WOOD FINISH' }}</h3>
+        <div class="texture-grid">
+          {% assign wood_products = collections.all.products | where: 'tags', section.settings.wood_tag %}
+          {% for product in wood_products limit: 6 %}
+            <div class="texture-item wood-option" 
+                 data-wood="{{ product.featured_image | image_url: width: 512 }}"
+                 data-name="{{ product.title }}"
+                 data-product-id="{{ product.id }}">
+              <img src="{{ product.featured_image | image_url: width: 80 }}" 
+                   alt="{{ product.title }}"
+                   width="60" 
+                   height="60"
+                   loading="lazy">
+              <p class="texture-name">{{ product.title }}</p>
+              {% if section.settings.show_price %}
+                <span class="texture-price">{{ product.price | money }}</span>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Selected Configuration Display -->
+      {% if section.settings.show_configuration %}
+        <div class="current-config">
+          <h4>{{ section.settings.config_title | default: 'Current Configuration' }}</h4>
+          <div class="config-details">
+            <div class="selected-fabric">
+              <strong>Fabric:</strong> <span id="selected-fabric-name">{{ section.settings.default_fabric_name | default: 'Select a fabric' }}</span>
+            </div>
+            <div class="selected-wood">
+              <strong>Wood:</strong> <span id="selected-wood-name">{{ section.settings.default_wood_name | default: 'Select wood finish' }}</span>
+            </div>
+            {% if section.settings.show_total_price %}
+              <div class="total-price">
+                <strong>Total:</strong> <span id="total-price">{{ section.settings.base_price | money_with_currency }}</span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+.threejs-couch-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.couch-viewer-wrapper {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 968px) {
+  .couch-viewer-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+.model-container {
+  min-height: 500px;
+}
+
+.texture-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.texture-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 15px;
+}
+
+.texture-item {
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+}
+
+.texture-item:hover {
+  border-color: {{ section.settings.accent_color | default: '#007bff' }};
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.texture-item.active {
+  border-color: {{ section.settings.accent_color | default: '#007bff' }};
+  background-color: rgba({{ section.settings.accent_color | default: '#007bff' | color_extract: 'red' }}, {{ section.settings.accent_color | default: '#007bff' | color_extract: 'green' }}, {{ section.settings.accent_color | default: '#007bff' | color_extract: 'blue' }}, 0.1);
+}
+
+.texture-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.texture-name {
+  font-size: 12px;
+  margin: 5px 0;
+  line-height: 1.2;
+}
+
+.texture-price {
+  font-size: 11px;
+  color: #666;
+  font-weight: 500;
+}
+
+.current-config {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.config-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.total-price {
+  font-size: 18px;
+  padding-top: 10px;
+  border-top: 1px solid #dee2e6;
+  margin-top: 10px;
+}
+
+#model__container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: {{ section.settings.background_color | default: '#f8f9fa' }};
+  position: relative;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.fabric-options h3,
+.wood-options h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+</style>
+
+<!-- Include Three.js libraries via CDN for now -->
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script defer>
+// Three.js Couch Viewer with Product Integration
+class ProductCouchViewer {
+  constructor() {
+    this.scene = null;
+    this.camera = null;
+    this.renderer = null;
+    this.controls = null;
+    this.couchParts = {};
+    
+    // Current selections
+    this.selectedFabric = {
+      name: "{{ section.settings.default_fabric_name | default: '' }}",
+      texture: "{{ section.settings.default_fabric_image | image_url: width: 512 }}",
+      productId: null,
+      price: {{ section.settings.default_fabric_price | default: 0 }}
+    };
+    
+    this.selectedWood = {
+      name: "{{ section.settings.default_wood_name | default: '' }}",
+      texture: "{{ section.settings.default_wood_image | image_url: width: 512 }}",
+      productId: null,
+      price: {{ section.settings.default_wood_price | default: 0 }}
+    };
+    
+    this.basePrice = {{ section.settings.base_price | default: 0 }};
+    
+    // Wait for Three.js to load
+    this.waitForThreeJS();
+  }
+  
+  waitForThreeJS() {
+    if (typeof THREE !== 'undefined') {
+      this.init();
+    } else {
+      setTimeout(() => this.waitForThreeJS(), 100);
+    }
+  }
+  
+  init() {
+    const container = document.getElementById('model__container');
+    if (!container) return;
+    
+    // Show loading
+    this.showLoading(container);
+    
+    const width = container.offsetWidth;
+    const height = container.offsetHeight;
+    
+    // Scene setup
+    this.scene = new THREE.Scene();
+    this.scene.fog = new THREE.FogExp2(0xFFFFFF, 0);
+    
+    // Camera setup
+    this.camera = new THREE.PerspectiveCamera(50, width / height, 1, 1000);
+    this.camera.position.set(-20, 20, 50);
+    
+    // Renderer setup
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.setClearColor(0xFFFFFF);
+    this.renderer.setSize(width, height);
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.BasicShadowMap;
+    
+    container.appendChild(this.renderer.domElement);
+    
+    // Setup orbit controls (basic implementation)
+    this.setupControls();
+    
+    // Lighting setup
+    this.setupLighting();
+    
+    // Floor
+    this.createFloor();
+    
+    // Create demo couch for now
+    this.createDemoCouch();
+    
+    // Setup event listeners
+    this.setupEventListeners();
+    
+    // Handle window resize
+    window.addEventListener('resize', () => this.onWindowResize());
+    
+    // Hide loading
+    this.hideLoading(container);
+    
+    // Start animation loop
+    this.animate();
+  }
+  
+  showLoading(container) {
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = '<div>Loading 3D Viewer...</div>';
+    container.appendChild(overlay);
+  }
+  
+  hideLoading(container) {
+    const overlay = container.querySelector('.loading-overlay');
+    if (overlay) overlay.remove();
+  }
+  
+  setupControls() {
+    // Basic manual orbit controls since we don't have OrbitControls loaded
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+    
+    this.renderer.domElement.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+    });
+    
+    this.renderer.domElement.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      
+      const deltaMove = {
+        x: e.clientX - previousMousePosition.x,
+        y: e.clientY - previousMousePosition.y
+      };
+      
+      const spherical = new THREE.Spherical();
+      spherical.setFromVector3(this.camera.position);
+      spherical.theta -= deltaMove.x * 0.01;
+      spherical.phi += deltaMove.y * 0.01;
+      spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+      
+      this.camera.position.setFromSpherical(spherical);
+      this.camera.lookAt(0, 0, 0);
+      
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+    });
+    
+    this.renderer.domElement.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+    
+    // Mouse wheel for zoom
+    this.renderer.domElement.addEventListener('wheel', (e) => {
+      const scale = e.deltaY > 0 ? 1.1 : 0.9;
+      this.camera.position.multiplyScalar(scale);
+    });
+  }
+  
+  setupLighting() {
+    // Ambient light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    this.scene.add(ambientLight);
+    
+    // Directional light
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+    directionalLight.position.set(50, 50, 0);
+    directionalLight.castShadow = true;
+    this.scene.add(directionalLight);
+  }
+  
+  createFloor() {
+    const geometry = new THREE.PlaneGeometry(100, 100);
+    const material = new THREE.MeshPhongMaterial({
+      color: 0xa0adaf,
+      side: THREE.DoubleSide
+    });
+    
+    const floor = new THREE.Mesh(geometry, material);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -5;
+    floor.receiveShadow = true;
+    this.scene.add(floor);
+  }
+  
+  createDemoCouch() {
+    // Demo couch until real models are loaded
+    const couchGroup = new THREE.Group();
+    
+    // Main body
+    const bodyGeometry = new THREE.BoxGeometry(30, 12, 20);
+    const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0x8b4513 });
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    body.position.y = 6;
+    couchGroup.add(body);
+    
+    // Backrest
+    const backGeometry = new THREE.BoxGeometry(30, 15, 3);
+    const backMaterial = new THREE.MeshPhongMaterial({ color: 0x8b4513 });
+    const back = new THREE.Mesh(backGeometry, backMaterial);
+    back.position.set(0, 13.5, 8.5);
+    couchGroup.add(back);
+    
+    // Arms
+    const armGeometry = new THREE.BoxGeometry(3, 10, 15);
+    const armMaterial = new THREE.MeshPhongMaterial({ color: 0x654321 });
+    
+    const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+    leftArm.position.set(-13.5, 11, 2.5);
+    couchGroup.add(leftArm);
+    
+    const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+    rightArm.position.set(13.5, 11, 2.5);
+    couchGroup.add(rightArm);
+    
+    couchGroup.castShadow = true;
+    couchGroup.receiveShadow = true;
+    this.scene.add(couchGroup);
+    
+    this.couchParts.main = couchGroup;
+  }
+  
+  setupEventListeners() {
+    // Fabric selection
+    document.querySelectorAll('.fabric-option').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const textureUrl = item.dataset.texture;
+        const name = item.dataset.name;
+        const productId = item.dataset.productId;
+        
+        this.selectFabric(textureUrl, name, productId);
+        this.updateActiveState(item, '.fabric-option');
+      });
+    });
+    
+    // Wood selection  
+    document.querySelectorAll('.wood-option').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const woodUrl = item.dataset.wood;
+        const name = item.dataset.name;
+        const productId = item.dataset.productId;
+        
+        this.selectWood(woodUrl, name, productId);
+        this.updateActiveState(item, '.wood-option');
+      });
+    });
+  }
+  
+  selectFabric(textureUrl, name, productId) {
+    this.selectedFabric = { texture: textureUrl, name, productId };
+    
+    // Update fabric texture on couch
+    this.updateFabricTexture(textureUrl);
+    
+    // Update UI
+    const nameElement = document.getElementById('selected-fabric-name');
+    if (nameElement) nameElement.textContent = name;
+    
+    this.updateTotalPrice();
+    
+    // Trigger custom event for analytics/tracking
+    window.dispatchEvent(new CustomEvent('fabricSelected', {
+      detail: { name, productId, textureUrl }
+    }));
+  }
+  
+  selectWood(woodUrl, name, productId) {
+    this.selectedWood = { texture: woodUrl, name, productId };
+    
+    // Update wood texture on couch
+    this.updateWoodTexture(woodUrl);
+    
+    // Update UI
+    const nameElement = document.getElementById('selected-wood-name');
+    if (nameElement) nameElement.textContent = name;
+    
+    this.updateTotalPrice();
+    
+    // Trigger custom event
+    window.dispatchEvent(new CustomEvent('woodSelected', {
+      detail: { name, productId, woodUrl }
+    }));
+  }
+  
+  updateActiveState(selectedItem, selector) {
+    document.querySelectorAll(selector).forEach(item => {
+      item.classList.remove('active');
+    });
+    selectedItem.classList.add('active');
+  }
+  
+  updateFabricTexture(textureUrl) {
+    if (!this.couchParts.main) return;
+    
+    const loader = new THREE.TextureLoader();
+    loader.load(textureUrl, (texture) => {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      
+      // Apply to main body (demo)
+      this.couchParts.main.children[0].material.map = texture;
+      this.couchParts.main.children[0].material.needsUpdate = true;
+    });
+  }
+  
+  updateWoodTexture(woodUrl) {
+    if (!this.couchParts.main) return;
+    
+    const loader = new THREE.TextureLoader();
+    loader.load(woodUrl, (texture) => {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      
+      // Apply to arms (demo)
+      if (this.couchParts.main.children[2]) {
+        this.couchParts.main.children[2].material.map = texture;
+        this.couchParts.main.children[2].material.needsUpdate = true;
+      }
+      if (this.couchParts.main.children[3]) {
+        this.couchParts.main.children[3].material.map = texture;
+        this.couchParts.main.children[3].material.needsUpdate = true;
+      }
+    });
+  }
+  
+  updateTotalPrice() {
+    const totalElement = document.getElementById('total-price');
+    if (!totalElement) return;
+    
+    // This would calculate based on selected products
+    // For now, just show base price
+    totalElement.textContent = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(this.basePrice / 100);
+  }
+  
+  onWindowResize() {
+    const container = document.getElementById('model__container');
+    if (!container) return;
+    
+    const width = container.offsetWidth;
+    const height = container.offsetHeight;
+    
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height);
+  }
+  
+  animate() {
+    requestAnimationFrame(() => this.animate());
+    
+    // Auto-rotate
+    if (this.couchParts.main) {
+      this.couchParts.main.rotation.y += 0.005;
+    }
+    
+    this.renderer.render(this.scene, this.camera);
+  }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('model__container')) {
+    new ProductCouchViewer();
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name": "3D Product Couch Viewer",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "3D Viewer Settings"
+    },
+    {
+      "type": "text",
+      "id": "viewer_description",
+      "label": "Viewer Description",
+      "default": "Drag couch to view different angles"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Viewer Background Color",
+      "default": "#f8f9fa"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#007bff"
+    },
+    {
+      "type": "header",
+      "content": "Product Integration"
+    },
+    {
+      "type": "text",
+      "id": "fabric_tag",
+      "label": "Fabric Products Tag",
+      "default": "couch-fabric",
+      "info": "Tag to identify fabric products"
+    },
+    {
+      "type": "text",
+      "id": "wood_tag", 
+      "label": "Wood Products Tag",
+      "default": "couch-wood",
+      "info": "Tag to identify wood finish products"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show Product Prices",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Section Titles"
+    },
+    {
+      "type": "text",
+      "id": "fabric_title",
+      "label": "Fabric Section Title",
+      "default": "SELECT FABRIC"
+    },
+    {
+      "type": "text",
+      "id": "wood_title",
+      "label": "Wood Section Title", 
+      "default": "SELECT WOOD FINISH"
+    },
+    {
+      "type": "header",
+      "content": "Configuration Display"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_configuration",
+      "label": "Show Current Configuration",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "config_title",
+      "label": "Configuration Title",
+      "default": "Current Configuration"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_total_price",
+      "label": "Show Total Price",
+      "default": false
+    },
+    {
+      "type": "number",
+      "id": "base_price",
+      "label": "Base Price (in cents)",
+      "default": 299900,
+      "info": "Base couch price in cents (e.g., 299900 = R$ 2,999.00)"
+    },
+    {
+      "type": "header",
+      "content": "Default Selections"
+    },
+    {
+      "type": "text",
+      "id": "default_fabric_name",
+      "label": "Default Fabric Name",
+      "default": ""
+    },
+    {
+      "type": "image_picker",
+      "id": "default_fabric_image",
+      "label": "Default Fabric Image"
+    },
+    {
+      "type": "text",
+      "id": "default_wood_name",
+      "label": "Default Wood Name", 
+      "default": ""
+    },
+    {
+      "type": "image_picker",
+      "id": "default_wood_image",
+      "label": "Default Wood Image"
+    }
+  ],
+  "presets": [
+    {
+      "name": "3D Product Couch Viewer"
+    }
+  ]
+}
+{% endschema %}

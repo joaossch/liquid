@@ -1,0 +1,26 @@
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+
+// Função para abrir o chat
+window.openTawkChat = function() {
+  if (typeof Tawk_API !== 'undefined' && Tawk_API.maximize) {
+    Tawk_API.maximize();
+  }
+}
+
+// Configurar Tawk.to para iniciar minimizado se especificado
+{% if hide_widget %}
+Tawk_API.onLoad = function(){
+  Tawk_API.hideWidget();
+};
+{% endif %}
+
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='{{ tawk_url | default: "https://embed.tawk.to/68db0a791e8c551950e0e766/1j6bq1qt9" }}';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
